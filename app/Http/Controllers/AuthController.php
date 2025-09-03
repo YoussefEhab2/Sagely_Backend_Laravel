@@ -52,4 +52,11 @@ class AuthController extends Controller
             ], 401);
         }
     }
+
+    public function logout(Request $request){
+        $this->service->logout();
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ], 200);
+    }
 }

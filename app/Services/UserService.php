@@ -44,4 +44,9 @@ class UserService
             'token' => $token,
         ];
     }
+
+    public function logout(): array{
+        $this->users->logout();
+        return ['message' => 'Successfully logged out'];
+    }
 }
