@@ -59,4 +59,54 @@ class AuthController extends Controller
             'message' => 'Successfully logged out'
         ], 200);
     }
+
+
+   public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+        ]);
+
+        try {
+            $this->service->changePassword($request->all());
+            return response()->json(['message' => 'Password changed successfully']);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+
+    public function me()
+{
+    $user = auth('api')->user();
+
+    if (!$user) {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
+
+    return response()->json([
+        'success' => true,
+        'user' => $user
+    ]);
+}
+
+
+public function updateProfile(Request $request)
+{
+    $request->validate([
+        'phoneNumber' => 'nullable|string|max:20',
+        'emailNotificationPreferences' => 'nullable|boolean',
+        'siteNotificationPreferences' => 'nullable|boolean',
+    ]);
+
+    $user = auth('api')->user(); // Get user from token
+
+    $updatedUser = $this->service->updateProfile($user, $request->all());
+
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'user'    => $updatedUser,
+    ]);
+}
 }
