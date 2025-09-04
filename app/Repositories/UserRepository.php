@@ -23,4 +23,17 @@ class UserRepository
     {
         return User::create($data);
     }
+
+    public function changePassword(User $user, string $hashedPassword): User
+    {
+        $user->passwordHash = $hashedPassword;
+        $user->save();
+        return $user;
+}
+
+public function updateProfile(User $user, array $data): User
+{
+    $user->update($data);
+    return $user;
+}
 }

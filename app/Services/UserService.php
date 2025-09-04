@@ -49,4 +49,33 @@ class UserService
         $this->users->logout();
         return ['message' => 'Successfully logged out'];
     }
+
+    public function changePassword(array $data): User
+    {
+       $user = auth('api')->user();
+
+        if (!Hash::check($data['old_password'], $user->passwordHash)) {
+            throw new Exception('Old password is incorrect');
+        }
+
+        return $this->users->changePassword($user, Hash::make($data['new_password']));
+    }
+    public function updateProfile(User $user, array $data): User
+    {
+      $updateData = [];
+
+    if (isset($data['phoneNumber'])) {
+        $updateData['phoneNumber'] = $data['phoneNumber'];
+    }
+
+    if (isset($data['emailNotificationPreferences'])) {
+        $updateData['emailNotificationPreferences'] = (bool) $data['emailNotificationPreferences'];
+    }
+
+    if (isset($data['siteNotificationPreferences'])) {
+        $updateData['siteNotificationPreferences'] = (bool) $data['siteNotificationPreferences'];
+    }
+
+    return $this->users->updateProfile($user, $updateData);
+    }
 }
