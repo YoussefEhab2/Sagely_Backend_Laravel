@@ -20,4 +20,18 @@ class AnnouncementRepository
         $announcement->update($data);
         return $announcement;
     }
+    public function delete(int $id): bool{
+       $announcement = Announcement::find($id);
+
+        if ($announcement) {
+            return (bool) $announcement->delete();
+        }
+
+        return false;
+    }
+
+    public function getAll()
+    {
+        return Announcement::all();
+    }
 }

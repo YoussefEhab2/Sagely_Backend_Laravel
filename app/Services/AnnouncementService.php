@@ -45,4 +45,15 @@ class AnnouncementService
 
         return $this->announcements->update($announcement, $updateData);
     }
+    public function deleteAnnouncement(int $id): bool
+    {
+        return $this->announcements->delete($id);
+    }
+    public function getallAnnouncements()
+    {
+        return $this->announcements->getAll();
+    }
+    public function getAnnouncement(int $id){
+        return $this->announcements->findById($id);
+    }
 }

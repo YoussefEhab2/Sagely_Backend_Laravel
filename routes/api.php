@@ -18,5 +18,11 @@ Route::get('/me', [AuthController::class,'me'])->middleware('auth:api');
     ->middleware(['auth:api', 'role:Admin']);
 Route::put('/announcements/{id}', [AnnouncementController::class, 'edit'])
     ->middleware(['auth:api', 'role:Admin']);
+Route::delete('/announcements/{id}', [AnnouncementController::class, 'delete'])
+    ->middleware(['auth:api', 'role:Admin']);
+Route::get('/announcements', [AnnouncementController::class, 'index']);
+
+Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
+
 
 
