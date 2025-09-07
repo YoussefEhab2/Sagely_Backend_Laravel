@@ -32,7 +32,10 @@ class Course extends Model
 		'name',
 		'description'
 	];
-
+public function admin()
+	{
+		return $this->belongsTo(User::class, 'adminid');
+	}
 	public function announcements()
 	{
 		return $this->hasMany(Announcement::class, 'courseID');

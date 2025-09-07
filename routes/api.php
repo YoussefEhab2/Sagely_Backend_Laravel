@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\CourseController;
 
 Route::post('/signup', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,4 +26,8 @@ Route::get('/announcements', [AnnouncementController::class, 'index']);
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
 
 
+// Course Routes
+Route::post('/courses', [CourseController::class, 'create'])->middleware(['auth:api', 'role:Admin']);
 
+
+Route::put('/courses/{id}', [CourseController::class, 'update'])->middleware('auth:api', 'role:Admin');
