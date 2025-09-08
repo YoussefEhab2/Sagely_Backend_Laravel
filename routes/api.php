@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
 
 Route::post('/signup', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -34,3 +35,6 @@ Route::put('/courses/{id}', [CourseController::class, 'update'])->middleware('au
 Route::delete('/courses/{id}', [CourseController::class, 'delete'])->middleware('auth:api', 'role:Admin');
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/courses/{id}', [CourseController::class, 'show']);
+// Enrollment Routes
+ Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll'])->middleware('auth:api', 'role:Student');
+ Route::get('/courses/{courseId}/students', [EnrollmentController::class, 'getByCourse'])->middleware('auth:api', 'role:Admin');
