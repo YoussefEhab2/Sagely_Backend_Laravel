@@ -79,4 +79,15 @@ public function show(int $id)
         return response()->json(['announcement' => $announcement]);
     }
 
+    public function getByCourse(int $courseId)
+    {
+        $announcements = $this->service->getAnnouncementsByCourseId($courseId);
+
+        if ($announcements->isEmpty()) {
+            return response()->json(['message' => 'No announcements found for this course'], 404);
+        }
+
+        return response()->json(['announcements' => $announcements], 200);
+    }
+
 }
