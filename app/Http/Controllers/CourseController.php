@@ -50,4 +50,33 @@ class CourseController extends Controller
             'course'  => $result['course'],
         ], 200);
     }
+    public function delete(int $id)
+    {
+        $result = $this->courseService->deleteCourse($id);
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json([
+            'message' => $result['message']
+        ], 200);
+    }
+    public function index()
+    {
+        $courses = $this->courseService->getAllCourses();
+
+        return response()->json([
+            'courses' => $courses
+        ], 200);
+    }
+    public function show(int $id){
+        $course = $this->courseService->getCourseById($id);
+
+        if (!$course) {
+            return response()->json(['error' => 'Course not found'], 404);
+        }
+
+        return response()->json(['course' => $course], 200);
+    }
 }
