@@ -24,6 +24,7 @@ Route::delete('/announcements/{id}', [AnnouncementController::class, 'delete'])
 Route::get('/announcements', [AnnouncementController::class, 'index']);
 
 Route::get('/announcements/{id}', [AnnouncementController::class, 'show']);
+Route::get('/courses/{courseId}/announcements', [AnnouncementController::class, 'getByCourse'])->middleware('auth:api');
 
 
 // Course Routes
