@@ -31,3 +31,6 @@ Route::post('/courses', [CourseController::class, 'create'])->middleware(['auth:
 
 
 Route::put('/courses/{id}', [CourseController::class, 'update'])->middleware('auth:api', 'role:Admin');
+Route::delete('/courses/{id}', [CourseController::class, 'delete'])->middleware('auth:api', 'role:Admin');
+Route::get('/courses', [CourseController::class, 'index'])->middleware('auth:api');
+Route::get('/courses/{id}', [CourseController::class, 'show'])->middleware('auth:api');

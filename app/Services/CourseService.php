@@ -35,4 +35,35 @@ class CourseService
 
         return ['course' => $updated, 'status' => 200];
     }
+
+    public function deleteCourse(int $id)
+    {
+        $course = $this->courses->findById($id);
+
+        if (!$course) {
+            return ['error' => 'Course not found', 'status' => 404];
+        }
+
+        $user = auth('api')->user();
+
+        if ($course->adminid !== $user->id) {
+            return ['error' => 'Forbidden: You do not own this course', 'status' => 403];
+        }
+
+        $deleted = $this->courses->delete($course);
+
+        if ($deleted) {
+            return ['message' => 'Course deleted successfully', 'status' => 200];
+        } else {
+            return ['error' => 'Failed to delete course', 'status' => 500];
+        }
+    }
+    public function getAllCourses()
+    {
+        return $this->courses->getAll();
+    }
+    public function getCourseById(int $id)
+    {
+        return $this->courses->findById($id);
+    }
 }

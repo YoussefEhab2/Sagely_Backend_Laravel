@@ -25,6 +25,13 @@ class CourseRepository
     {
         return Course::find($id);
     }
+    public function delete(Course $course): bool{
+        return $course->delete();
+    }
+    public function getAll()
+    {
+        return Course::all();
+    }
 
 
 }
