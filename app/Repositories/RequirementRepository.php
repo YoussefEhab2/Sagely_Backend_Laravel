@@ -25,4 +25,9 @@ class RequirementRepository
     {
         return $requirement->delete();
     }
+     public function getByCourseId(int $courseId)
+    {
+        return Requirement::where('courseID', $courseId)->get();
+    }
+    
 }

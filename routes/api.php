@@ -45,3 +45,4 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
  Route::post('/requirements', [RequirementController::class, 'store'])->middleware(['auth:api', 'role:Admin']);
   Route::put('/requirements/{id}', [RequirementController::class, 'update'])->middleware(['auth:api', 'role:Admin']);
   Route::delete('/requirements/{id}', [RequirementController::class, 'deleteRequirement'])->middleware(['auth:api', 'role:Admin']);
+  Route::get('/courses/{courseId}/requirements', [RequirementController::class, 'getRequirementsByCourse'])->middleware('auth:api');

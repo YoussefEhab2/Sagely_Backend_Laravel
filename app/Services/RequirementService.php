@@ -74,4 +74,8 @@ $user = auth('api')->user();
 
         return $this->requirements->delete($requirement);
     }
+    public function getRequirementsByCourse(int $courseId)
+    {
+        return $this->requirements->getByCourseId($courseId);
+    }
 }

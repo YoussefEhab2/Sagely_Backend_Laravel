@@ -63,4 +63,14 @@ class RequirementController extends Controller
 
         return response()->json(['error' => $result], 403);
     }
+    public function getRequirementsByCourse(int $courseId): JsonResponse
+    {
+        $requirements = $this->service->getRequirementsByCourse($courseId);
+
+        if ($requirements->isEmpty()) {
+            return response()->json(['message' => 'No requirements found for this course'], 404);
+        }
+
+        return response()->json($requirements, 200);
+    }
 }
