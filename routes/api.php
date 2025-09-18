@@ -6,6 +6,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\RequirementController;
+use App\Http\Controllers\RequirementSubmissionController;
 
 Route::post('/signup', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -46,3 +47,6 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
   Route::put('/requirements/{id}', [RequirementController::class, 'update'])->middleware(['auth:api', 'role:Admin']);
   Route::delete('/requirements/{id}', [RequirementController::class, 'deleteRequirement'])->middleware(['auth:api', 'role:Admin']);
   Route::get('/courses/{courseId}/requirements', [RequirementController::class, 'getRequirementsByCourse'])->middleware('auth:api');
+  // Requirement Submission Route
+  Route::post('/requirements/{id}/submit', [RequirementSubmissionController::class, 'submit'])->middleware('auth:api','role:Student');
+  Route::get('/requirements/{id}/submissions', [RequirementSubmissionController::class, 'getSubmissions'])->middleware('auth:api','role:Admin');    
