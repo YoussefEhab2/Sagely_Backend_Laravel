@@ -29,4 +29,11 @@ class RequirementSubmissionRepository
     {
         return Requirementsubmission::where('requirementID', $requirementId)->get();
     }
+
+    public function getByStudentIdWithCourse(int $studentId)
+    {
+        return Requirementsubmission::with(['requirement.course'])
+            ->where('studentID', $studentId)
+            ->get();
+    }
 }
