@@ -50,4 +50,21 @@ class RequirementSubmissionController extends Controller
 
         return response()->json(['submissions' => $result]);
     }
+
+    public function getMySubmissions(): JsonResponse
+    {
+        $userId = auth('api')->user()->id;
+
+        $submissions = $this->service->getMySubmissionsWithCourse($userId);
+
+        $formatted = $submissions->map(function ($submission) {
+            return [
+                'requirementTitle' => $submission->requirement->title,
+                'courseName'       => $submission->requirement->course->name,
+                'fileUrl'          => $submission->fileUrl,
+            ];
+        });
+
+        return response()->json(['submissions' => $formatted]);
+    }
 }

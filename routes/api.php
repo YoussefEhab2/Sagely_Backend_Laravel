@@ -49,4 +49,5 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
   Route::get('/courses/{courseId}/requirements', [RequirementController::class, 'getRequirementsByCourse'])->middleware('auth:api');
   // Requirement Submission Route
   Route::post('/requirements/{id}/submit', [RequirementSubmissionController::class, 'submit'])->middleware('auth:api','role:Student');
-  Route::get('/requirements/{id}/submissions', [RequirementSubmissionController::class, 'getSubmissions'])->middleware('auth:api','role:Admin');    
+  Route::get('/requirements/{id}/submissions', [RequirementSubmissionController::class, 'getSubmissions'])->middleware('auth:api','role:Admin');
+  Route::get('/me/submissions', [RequirementSubmissionController::class, 'getMySubmissions'])->middleware('auth:api','role:Student');

@@ -92,4 +92,9 @@ class RequirementSubmissionService
 
         return $this->repo->getByRequirementId($requirementId);
     }
+
+    public function getMySubmissionsWithCourse(int $userId)
+    {
+        return $this->repo->getByStudentIdWithCourse($userId);
+    }
 }
