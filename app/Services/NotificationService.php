@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Repositories\NotificationRepository;
 use App\Models\Enrolledstudent;
 use App\Models\User;
+use App\Mail\UserNotificationMail;
+use Illuminate\Support\Facades\Mail;
 class NotificationService
 {
     protected $notifications;
@@ -30,6 +32,12 @@ class NotificationService
                 'recipientID' => $studentId,
                 'status'      => 'unread',
             ]);
+
+            if ($student->email && $student->emailNotificationPreferences) {
+                Mail::to($student->email)->send(
+                    new UserNotificationMail("New $type", $message)
+                );
+            }
         }
 
         return $students;
@@ -47,12 +55,19 @@ class NotificationService
             return null;
         }
 
-        return $this->notifications->create([
+        $notification=$this->notifications->create([
             'type'        => $type,
             'message'     => $message,
             'recipientID' => $studentId,
             'status'      => 'unread',
         ]);
+
+        if ($student->email && $student->emailNotificationPreferences) {
+            Mail::to($student->email)->send(
+                new UserNotificationMail("New $type", $message)
+            );
+        }
+        return $notification;
     }
 
 public function markAsRead(int $notificationId, int $userId)
