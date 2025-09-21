@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use App\Mail\UserNotificationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class NotificationController extends Controller
 {
@@ -75,6 +78,30 @@ class NotificationController extends Controller
         'message' => 'Notification marked as read',
         'notification' => $notification
     ]);
+}
+
+public function sendEmailNotification(Request $request, $studentId)
+{
+    $request->validate([
+        'subject' => 'required|string',
+        'message' => 'required|string',
+    ]);
+
+    $student = User::find($studentId);
+
+    if (!$student || !$student->email) {
+        return response()->json(['error' => 'Student not found or no email'], 404);
+    }
+
+    if ($student->emailNotificationPreferences === false) {
+        return response()->json(['error' => 'Student disabled email notifications'], 403);
+    }
+
+    Mail::to($student->email)->send(
+        new UserNotificationMail($request->subject, $request->message)
+    );
+
+    return response()->json(['message' => 'Email notification sent']);
 }
 
 }
