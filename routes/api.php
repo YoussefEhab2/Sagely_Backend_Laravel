@@ -8,6 +8,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\RequirementSubmissionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DownloadableFileController;
 
 Route::post('/signup', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -60,4 +61,8 @@ Route::get('/notifications/me', [NotificationController::class, 'myNotifications
 Route::post('/students/{studentId}/notify', [NotificationController::class, 'notifyStudent'])->middleware(['auth:api', 'role:Admin']); 
 Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['auth:api', 'role:Student']);
 Route::post('/notifications/email/{studentId}', [NotificationController::class, 'sendEmailNotification'])->middleware(['auth:api', 'role:Admin']);
+// Downloadable File Routes
+Route::post('/courses/{courseId}/files', [DownloadableFileController::class, 'uploadFile'])->middleware(['auth:api', 'role:Admin']);
+Route::put('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'updateFile'])->middleware(['auth:api', 'role:Admin']);
+Route::delete('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'deleteFile'])->middleware(['auth:api', 'role:Admin']);
 
