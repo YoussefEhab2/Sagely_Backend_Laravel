@@ -68,25 +68,34 @@ class EnrollmentService
     return ['data' => $courses, 'status' => 200];
 }
 
-public function enrollStudentByAdmin(int $courseId, int $studentId, int $adminId)
+public function enrollStudentByAdmin(int $courseId, int $studentId, int $adminId,bool $replaceSubmission)
 {
-    $course = Course::find($courseId);
+      $course = Course::find($courseId);
 
     if (!$course) {
         return ['error' => 'Course not found', 'status' => 404];
     }
 
-    // Check admin ownership
     if ($course->adminid !== $adminId) {
         return ['error' => 'Forbidden: You are not the admin of this course', 'status' => 403];
     }
+    $requirements = $course->requirements;
+    foreach ($requirements as $requirement) {
+        foreach ($requirement->submissions as $submission) {
+            if ($submission->studentID === $studentId) {
+                $submission->delete();
+            }
+        }
+    }
 
-    // Check if already enrolled
+    if (!$replaceSubmission) {
+        return ['message' => 'Submissions deleted only', 'status' => 200];
+    }
+
     if ($this->repository->findEnrollment($courseId, $studentId)) {
         return ['error' => 'Student already enrolled in this course', 'status' => 400];
     }
 
-    // Enroll student
     $enrollment = $this->repository->createEnrollment($courseId, $studentId);
 
     return ['data' => $enrollment, 'status' => 201];
