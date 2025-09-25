@@ -34,8 +34,4 @@ class AnnouncementRepository
     {
         return Announcement::all();
     }
-    public function getByCourseId(int $courseId)
-    {
-        return Announcement::where('courseID', $courseId)->get();
-    }
 }
