@@ -32,6 +32,7 @@ class EnrollmentController extends Controller
     }
 
 
+
      public function getByCourse(int $courseId)
     {
        $admin = auth('api')->user();
@@ -45,4 +46,35 @@ class EnrollmentController extends Controller
 
         return response()->json(['students' => $result['data']], 200);
     }
+
+    public function getMyEnrolledCourses()
+{
+    $student = auth('api')->user();
+    $studentId = $student->id;
+
+    $result = $this->service->getEnrolledCoursesByStudent($studentId);
+
+    if (isset($result['error'])) {
+        return response()->json(['error' => $result['error']], $result['status']);
+    }
+
+    return response()->json(['courses' => $result['data']], 200);
+}
+
+public function enrollStudentByAdmin(int $courseId, int $studentId)
+{
+    $admin = auth('api')->user();
+    $adminId = $admin->id;
+
+    $result = $this->service->enrollStudentByAdmin($courseId, $studentId, $adminId);
+
+    if (isset($result['error'])) {
+        return response()->json(['error' => $result['error']], $result['status']);
+    }
+
+    return response()->json([
+        'message' => 'Student enrolled successfully.',
+        'data'    => $result['data']
+    ], $result['status']);
+}
 }

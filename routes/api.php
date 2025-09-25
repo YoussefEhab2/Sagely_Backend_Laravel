@@ -38,3 +38,5 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
 // Enrollment Routes
  Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll'])->middleware('auth:api', 'role:Student');
  Route::get('/courses/{courseId}/students', [EnrollmentController::class, 'getByCourse'])->middleware('auth:api', 'role:Admin');
+ Route::get('/course/enrolled', [EnrollmentController::class, 'getMyEnrolledCourses'])->middleware('auth:api','role:Student');
+ Route::post('/course/{courseId}/enroll/{studentId}', [EnrollmentController::class, 'enrollStudentByAdmin'])->middleware('auth:api','role:Admin');
