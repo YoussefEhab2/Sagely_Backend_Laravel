@@ -61,20 +61,23 @@ class EnrollmentController extends Controller
     return response()->json(['courses' => $result['data']], 200);
 }
 
-public function enrollStudentByAdmin(int $courseId, int $studentId)
+public function enrollStudentByAdmin(Request $request, int $courseId, int $studentId)
 {
+    $request->validate([
+        'replaceSubmission' => 'required|boolean',
+    ]);
+
     $admin = auth('api')->user();
     $adminId = $admin->id;
 
-    $result = $this->service->enrollStudentByAdmin($courseId, $studentId, $adminId);
+    $replaceSubmission = $request->replaceSubmission;
+
+    $result = $this->service->enrollStudentByAdmin($courseId, $studentId, $adminId, $replaceSubmission);
 
     if (isset($result['error'])) {
         return response()->json(['error' => $result['error']], $result['status']);
     }
 
-    return response()->json([
-        'message' => 'Student enrolled successfully.',
-        'data'    => $result['data']
-    ], $result['status']);
+    return response()->json($result, $result['status']);
 }
 }
