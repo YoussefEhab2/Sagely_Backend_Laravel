@@ -67,4 +67,22 @@ class RequirementSubmissionController extends Controller
 
         return response()->json(['submissions' => $formatted]);
     }
+
+public function getSubmissionsByCourse(int $courseId): JsonResponse
+{
+    \Log::info('getSubmissionsByCourse method called', ['courseId' => $courseId]);
+    
+    $userId = auth('api')->user()->id;
+    
+    $result = $this->service->getSubmissionsByCourse($courseId, $userId);
+
+    \Log::info('getSubmissionsByCourse result', ['result' => $result]);
+
+    if (isset($result['error'])) {
+        $status = $result['error'] === 'Unauthorized' ? 403 : 404;
+        return response()->json(['error' => $result['error']], $status);
+    }
+
+    return response()->json(['submissions' => $result]);
+}
 }
