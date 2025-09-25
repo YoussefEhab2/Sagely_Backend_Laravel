@@ -42,7 +42,8 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
 // Enrollment Routes
  Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll'])->middleware('auth:api', 'role:Student');
  Route::get('/courses/{courseId}/students', [EnrollmentController::class, 'getByCourse'])->middleware('auth:api', 'role:Admin');
-
+ Route::get('/course/enrolled', [EnrollmentController::class, 'getMyEnrolledCourses'])->middleware('auth:api','role:Student');
+ Route::post('/course/{courseId}/enroll/{studentId}', [EnrollmentController::class, 'enrollStudentByAdmin'])->middleware('auth:api','role:Admin');
  // Requirement Routes
  Route::post('/requirements', [RequirementController::class, 'store'])->middleware(['auth:api', 'role:Admin']);
   Route::put('/requirements/{id}', [RequirementController::class, 'update'])->middleware(['auth:api', 'role:Admin']);
@@ -59,3 +60,4 @@ Route::get('/notifications/me', [NotificationController::class, 'myNotifications
 Route::post('/students/{studentId}/notify', [NotificationController::class, 'notifyStudent'])->middleware(['auth:api', 'role:Admin']); 
 Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['auth:api', 'role:Student']);
 Route::post('/notifications/email/{studentId}', [NotificationController::class, 'sendEmailNotification'])->middleware(['auth:api', 'role:Admin']);
+

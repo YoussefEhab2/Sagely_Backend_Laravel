@@ -28,4 +28,11 @@ class EnrollmentRepository
             ->where('courseID', $courseId)
             ->get();
     }
+
+    public function getByStudentId(int $studentId)
+{
+    return Enrolledstudent::with('course')
+        ->where('studentID', $studentId)
+        ->get();
+}
 }
