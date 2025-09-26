@@ -5,7 +5,7 @@ namespace App\Repositories;
 
 use App\Models\Downloadablefile;
 use App\Models\Course;
-
+use App\Models\Enrolledstudent;
 class DownloadableFileRepository
 {
     
@@ -74,5 +74,30 @@ class DownloadableFileRepository
         }
         
         return null;
+    }
+
+
+    public function findFileWithCourse(int $fileId)
+    {
+        return Downloadablefile::with('course')->find($fileId);
+    }
+
+    
+    public function isUserEnrolled(int $courseId, int $userId)
+    {
+        return Enrolledstudent::where('courseID', $courseId)
+            ->where('studentID', $userId)
+            ->exists();
+    }
+
+   
+    public function isCourseAdmin(int $courseId, int $userId)
+    {
+        $course = Course::find($courseId);
+        return $course && $course->adminid === $userId;
+    }
+ public function getByCourseId(int $courseId)
+    {
+        return Downloadablefile::where('courseID', $courseId)->get();
     }
 }

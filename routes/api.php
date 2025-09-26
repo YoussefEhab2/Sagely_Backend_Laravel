@@ -65,4 +65,5 @@ Route::post('/notifications/email/{studentId}', [NotificationController::class, 
 Route::post('/courses/{courseId}/files', [DownloadableFileController::class, 'uploadFile'])->middleware(['auth:api', 'role:Admin']);
 Route::put('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'updateFile'])->middleware(['auth:api', 'role:Admin']);
 Route::delete('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'deleteFile'])->middleware(['auth:api', 'role:Admin']);
-
+ Route::get('/files/{fileId}/download', [DownloadableFileController::class, 'downloadFile'])->middleware('auth:api');
+Route::get('/courses/{courseId}/files', [DownloadableFileController::class, 'getByCourse'])->middleware('auth:api');

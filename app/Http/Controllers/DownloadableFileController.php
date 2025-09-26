@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\DownloadableFileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class DownloadableFileController extends Controller
 {
     protected $service;
@@ -14,40 +15,47 @@ class DownloadableFileController extends Controller
         $this->service = $service;
     }
 
-   public function store(Request $request, int $courseId)
-{
-    $request->validate([
-        'file' => 'required|file',
-    ]);
+   public function uploadFile(Request $request, $courseId)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'file' => 'required|file|max:10240',
+        ]);
 
-    $file = $request->file('file');
-    $extension = $file->getClientOriginalExtension(); // pdf, docx, etc.
-    $publicId = 'course_' . $courseId . '_file_' . time();
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'details' => $validator->errors()
+            ], 422);
+        }
 
-    try {
-        $uploadResult = $this->cloudinary->uploadApi()->upload(
-            $file->getRealPath(),
-            [
-                'public_id'   => $publicId,
-                'folder'      => 'downloadable_files',
-                'overwrite'   => true,
-                'invalidate'  => true,
-                'resource_type' => 'raw', // force Cloudinary to treat as file, not image
-            ]
+        // Get authenticated admin ID
+        $adminId =auth('api')->user()->id;
+
+        // Call service to handle file upload
+        $result = $this->service->uploadFile(
+            $courseId,
+            $adminId,
+            $request->only(['name', 'description']),
+            $request->file('file')
         );
 
-        $uploadedFileUrl = $uploadResult['secure_url'];
-
-        return response()->json([
-            'message' => 'File uploaded successfully',
-            'url' => $uploadedFileUrl,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'File upload failed: ' . $e->getMessage()
-        ], 500);
+        // Return response
+        if ($result['success']) {
+            return response()->json([
+                'message' => $result['message'],
+                'file' => $result['file']
+            ], 201);
+        } else {
+            $code = $result['code'] ?? 500;
+            return response()->json([
+                'error' => $result['error']
+            ], $code);
+        }
     }
-}
+
 
     public function listFiles($courseId)
     {
@@ -128,11 +136,49 @@ class DownloadableFileController extends Controller
         }
     }
 
-    // Get File Info (optional - for completeness)
-    public function getFile($courseId, $fileId)
+    
+
+
+     public function downloadFile($fileId)
+{
+    
+    $userId = auth('api')->user()->id;
+
+    
+    $result = $this->service->downloadFile($fileId, $userId);
+
+   
+    if ($result['success']) {
+        return response()->json([
+            'success' => true,
+            'file_url' => $result['file_url'],
+            'file_name' => $result['file_name'],
+            'file' => $result['file']
+        ], 200);
+    } else {
+        $code = $result['code'] ?? 500;
+        return response()->json([
+            'success' => false,
+            'error' => $result['error']
+        ], $code);
+    }
+}
+
+
+public function getByCourse(int $courseId)
     {
-        // You can implement this if needed
-        return response()->json(['error' => 'Not implemented'], 501);
+        $user = auth('api')->user();
+
+        $result = $this->service->getFilesByCourse($courseId, $user->id);
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], $result['status']);
+        }
+
+        return response()->json([
+            'message' => 'Files retrieved successfully',
+            'files'   => $result['data']
+        ], 200);
     }
 }
 
