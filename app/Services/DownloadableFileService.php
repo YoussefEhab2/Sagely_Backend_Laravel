@@ -7,6 +7,7 @@ use App\Repositories\DownloadableFileRepository;
 use Cloudinary\Cloudinary;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use App\Models\Course;
 
 class DownloadableFileService
 {
@@ -103,39 +104,38 @@ class DownloadableFileService
     public function updateFile(int $courseId, int $fileId, int $adminId, array $data, $file = null)
     {
         try {
-            // Check if course exists
+         
             $course = $this->repo->findCourse($courseId);
             if (!$course) {
                 throw new Exception('Course not found', 404);
             }
 
-            // Check if user is course admin
+           
             if ($course->adminid !== $adminId) {
                 throw new Exception('Unauthorized. Only course admin can update files.', 403);
             }
 
-            // Check if file exists in the course
+        
             $existingFile = $this->repo->findFile($fileId, $courseId);
             if (!$existingFile) {
                 throw new Exception('File not found in this course', 404);
             }
 
-            // Check for duplicate file name (excluding current file)
+          
             if (isset($data['name']) && $this->repo->fileExistsInCourse($courseId, $data['name'], $fileId)) {
                 throw new Exception('A file with this name already exists in the course', 409);
             }
 
             $updateData = [];
 
-            // Handle file upload if new file is provided
+           
             if ($file) {
-                // Delete old file from Cloudinary
+                
                 $publicId = $this->repo->extractPublicIdFromUrl($existingFile->fileUrl);
                 if ($publicId) {
                     $this->cloudinary->uploadApi()->destroy($publicId);
                 }
 
-                // Upload new file to Cloudinary
                 $originalFileName = $file->getClientOriginalName();
                 $fileExtension = $file->getClientOriginalExtension();
                 $cleanName = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($originalFileName, PATHINFO_FILENAME));
@@ -157,7 +157,7 @@ class DownloadableFileService
                 $updateData['fileUrl'] = $uploadResult['secure_url'];
             }
 
-            // Update other fields
+  
             if (isset($data['name'])) {
                 $updateData['name'] = $data['name'];
             }
@@ -165,7 +165,7 @@ class DownloadableFileService
                 $updateData['description'] = $data['description'];
             }
 
-            // Update database record
+       
             $updatedFile = $this->repo->updateFile($fileId, $updateData);
             if (!$updatedFile) {
                 throw new Exception('Failed to update file in database', 500);
@@ -193,34 +193,34 @@ class DownloadableFileService
         }
     }
 
-    // Delete File
+  
     public function deleteFile(int $courseId, int $fileId, int $adminId)
     {
         try {
-            // Check if course exists
+           
             $course = $this->repo->findCourse($courseId);
             if (!$course) {
                 throw new Exception('Course not found', 404);
             }
 
-            // Check if user is course admin
+            
             if ($course->adminid !== $adminId) {
                 throw new Exception('Unauthorized. Only course admin can delete files.', 403);
             }
 
-            // Check if file exists in the course
+           
             $file = $this->repo->findFile($fileId, $courseId);
             if (!$file) {
                 throw new Exception('File not found in this course', 404);
             }
 
-            // Delete file from Cloudinary
+           
             $publicId = $this->repo->extractPublicIdFromUrl($file->fileUrl);
             if ($publicId) {
                 $this->cloudinary->uploadApi()->destroy($publicId);
             }
 
-            // Delete from database
+            
             $deleted = $this->repo->deleteFile($fileId);
             if (!$deleted) {
                 throw new Exception('Failed to delete file from database', 500);
@@ -245,6 +245,73 @@ class DownloadableFileService
                 'code' => $e->getCode() ?: 500
             ];
         }
+    }
+
+
+
+   public function downloadFile(int $fileId, int $userId)
+{
+    try {
+      
+        $file = $this->repo->findFileWithCourse($fileId);
+        if (!$file) {
+            throw new Exception('File not found', 404);
+        }
+
+        $courseId = $file->courseID;
+
+      
+        $isAdmin = $this->repo->isCourseAdmin($courseId, $userId);
+        $isEnrolled = $this->repo->isUserEnrolled($courseId, $userId);
+
+        if (!$isAdmin && !$isEnrolled) {
+            throw new Exception('Unauthorized. You must be enrolled in the course or be the course admin to download files.', 403);
+        }
+
+ 
+        return [
+            'success' => true,
+            'file_url' => $file->fileUrl,
+            'file_name' => $file->name,
+            'file' => $file
+        ];
+
+    } catch (Exception $e) {
+        Log::error('File URL retrieval failed', [
+            'error' => $e->getMessage(),
+            'file_id' => $fileId,
+            'user_id' => $userId
+        ]);
+        
+        return [
+            'success' => false,
+            'error' => 'File URL retrieval failed: ' . $e->getMessage(),
+            'code' => $e->getCode() ?: 500
+        ];
+    }
+}
+
+public function getFilesByCourse(int $courseId, int $userId)
+    {
+        $course = Course::with('enrolledstudents')->find($courseId);
+
+        if (!$course) {
+            return ['error' => 'Course not found', 'status' => 404];
+        }
+
+        
+        $isAdmin = $course->adminid === $userId;
+
+        
+        $isEnrolled = $course->enrolledstudents->contains('studentID', $userId);
+
+        if (!$isAdmin && !$isEnrolled) {
+            return ['error' => 'Forbidden: You are not allowed to view files for this course', 'status' => 403];
+        }
+
+        $files = $this->repo->getByCourseId($courseId);
+
+        return ['data' => $files, 'status' => 200];
     }
 
 }
