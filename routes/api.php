@@ -54,7 +54,8 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
   Route::get('/me/submissions', [RequirementSubmissionController::class, 'getMySubmissions'])->middleware('auth:api','role:Student');
   // Notification Routes
   Route::post('/courses/{courseId}/notify', [NotificationController::class, 'notifyCourseStudents'])->middleware(['auth:api', 'role:Admin']);
-Route::get('/notifications/me', [NotificationController::class, 'myNotifications'])->middleware(['auth:api', 'role:Student']);
+Route::get('/notifications/me', [NotificationController::class, 'myNotifications'])->middleware('auth:api');
 Route::post('/students/{studentId}/notify', [NotificationController::class, 'notifyStudent'])->middleware(['auth:api', 'role:Admin']); 
 Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['auth:api', 'role:Student']);
 Route::post('/notifications/email/{studentId}', [NotificationController::class, 'sendEmailNotification'])->middleware(['auth:api', 'role:Admin']);
+Route::post('/notify/all', [NotificationController::class, 'notifyAll'])->middleware(['auth:api', 'role:Admin']);

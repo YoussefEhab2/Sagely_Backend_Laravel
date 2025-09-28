@@ -63,6 +63,9 @@ class RequirementSubmissionService
                 'fileUrl'       => $uploadedFileUrl,
             ]);
 
+            app(\App\Services\NotificationService::class)
+    ->notifyCourseAdminOfSubmission($requirementID, $studentID, $uploadedFileUrl);
+
             return $submission;
 
         } catch (\Exception $e) {
