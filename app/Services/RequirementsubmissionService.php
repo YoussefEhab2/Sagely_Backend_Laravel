@@ -6,6 +6,8 @@ use App\Repositories\RequirementSubmissionRepository;
 use Illuminate\Support\Facades\Log;
 use Cloudinary\Cloudinary;
 use App\Models\Requirement;
+use App\Models\RequirementSubmission;
+use App\Models\Course;
 class RequirementSubmissionService
 {
     protected $repo;
@@ -100,4 +102,31 @@ class RequirementSubmissionService
     {
         return $this->repo->getByStudentIdWithCourse($userId);
     }
+
+public function getSubmissionsByCourse(int $courseId, int $userId)
+{
+    $course = Course::with(['requirements.requirementsubmissions.user'])->find($courseId);
+    
+    if (!$course) {
+        return ['error' => 'Course not found'];
+    }
+
+    if ($course->adminid !== $userId) {
+        return ['error' => 'Unauthorized'];
+    }
+    $submissions = $course->requirements->flatMap(function ($requirement) {
+        return $requirement->requirementsubmissions->map(function ($submission) use ($requirement) {
+            return [
+                'requirementTitle' => $requirement->title,
+                'requirementdescription' => $requirement->description,
+                'studentName'      => $submission->user->name,
+                'studentID'      => $submission->studentID,
+                'studentEmail'      => $submission->user->email,
+                'fileUrl'          => $submission->fileUrl,
+            ];
+        });
+    });
+
+    return $submissions;
+}
 }

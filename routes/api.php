@@ -8,6 +8,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\RequirementSubmissionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\DownloadableFileController;
 
 Route::post('/signup', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -42,7 +43,8 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
 // Enrollment Routes
  Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll'])->middleware('auth:api', 'role:Student');
  Route::get('/courses/{courseId}/students', [EnrollmentController::class, 'getByCourse'])->middleware('auth:api', 'role:Admin');
-
+ Route::get('/course/enrolled', [EnrollmentController::class, 'getMyEnrolledCourses'])->middleware('auth:api','role:Student');
+ Route::post('/course/{courseId}/enroll/{studentId}', [EnrollmentController::class, 'enrollStudentByAdmin'])->middleware('auth:api','role:Admin');
  // Requirement Routes
  Route::post('/requirements', [RequirementController::class, 'store'])->middleware(['auth:api', 'role:Admin']);
   Route::put('/requirements/{id}', [RequirementController::class, 'update'])->middleware(['auth:api', 'role:Admin']);
@@ -52,10 +54,18 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
   Route::post('/requirements/{id}/submit', [RequirementSubmissionController::class, 'submit'])->middleware('auth:api','role:Student');
   Route::get('/requirements/{id}/submissions', [RequirementSubmissionController::class, 'getSubmissions'])->middleware('auth:api','role:Admin');
   Route::get('/me/submissions', [RequirementSubmissionController::class, 'getMySubmissions'])->middleware('auth:api','role:Student');
+Route::get('/requirements/{courseId}/course/submissions', [RequirementSubmissionController::class, 'getSubmissionsByCourse'])->middleware('auth:api','role:Admin');
   // Notification Routes
-  Route::post('/courses/{courseId}/notify', [NotificationController::class, 'notifyCourseStudents'])->middleware(['auth:api', 'role:Admin']);
+ Route::post('/courses/{courseId}/notify', [NotificationController::class, 'notifyCourseStudents'])->middleware(['auth:api', 'role:Admin']);
 Route::get('/notifications/me', [NotificationController::class, 'myNotifications'])->middleware('auth:api');
 Route::post('/students/{studentId}/notify', [NotificationController::class, 'notifyStudent'])->middleware(['auth:api', 'role:Admin']); 
 Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['auth:api', 'role:Student']);
 Route::post('/notifications/email/{studentId}', [NotificationController::class, 'sendEmailNotification'])->middleware(['auth:api', 'role:Admin']);
 Route::post('/notify/all', [NotificationController::class, 'notifyAll'])->middleware(['auth:api', 'role:Admin']);
+// Downloadable File Routes
+Route::post('/courses/{courseId}/files', [DownloadableFileController::class, 'uploadFile'])->middleware(['auth:api', 'role:Admin']);
+Route::put('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'updateFile'])->middleware(['auth:api', 'role:Admin']);
+Route::delete('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'deleteFile'])->middleware(['auth:api', 'role:Admin']);
+ Route::get('/files/{fileId}/download', [DownloadableFileController::class, 'downloadFile'])->middleware('auth:api');
+Route::get('/courses/{courseId}/files', [DownloadableFileController::class, 'getByCourse'])->middleware('auth:api');
+
