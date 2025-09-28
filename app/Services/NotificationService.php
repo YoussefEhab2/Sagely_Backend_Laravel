@@ -83,4 +83,67 @@ public function markAsRead(int $notificationId, int $userId)
 
     return $notification;
 }    
+
+
+ public function notifyAllExceptSender(int $senderId, string $type, string $message)
+    {
+        $users = User::where('id', '!=', $senderId)->get();
+
+        foreach ($users as $user) {
+            
+            if ($user->siteNotificationPreferences) {
+                $this->notifications->create([
+                    'type'        => $type,
+                    'message'     => $message,
+                    'recipientID' => $user->id,
+                    'status'      => 'unread',
+                ]);
+            }
+
+            
+            if ($user->email && $user->emailNotificationPreferences) {
+                Mail::to($user->email)->send(
+                    new UserNotificationMail("New $type", $message)
+                );
+            }
+        }
+
+        return $users->pluck('id');
+    }
+
+    public function notifyCourseAdminOfSubmission(int $requirementID, int $studentID, string $fileUrl)
+{
+    $requirement = \App\Models\Requirement::with('course')->find($requirementID);
+
+    if (!$requirement || !$requirement->course) {
+        return null;
+    }
+
+    $adminId = $requirement->course->adminid;
+    $student = User::find($studentID);
+
+    if (!$adminId || !$student) {
+        return null;
+    }
+
+    $message = "Student {$student->name} submitted a requirement for '{$requirement->title}'.";
+    $type = "Requirement Submission";
+
+    
+    $notification = $this->notifications->create([
+        'type'        => $type,
+        'message'     => $message,
+        'recipientID' => $adminId,
+        'status'      => 'unread',
+    ]);
+
+    $admin = User::find($adminId);
+    if ($admin && $admin->email && $admin->emailNotificationPreferences) {
+        Mail::to($admin->email)->send(
+            new UserNotificationMail("New Requirement Submission", $message . " File: " . $fileUrl)
+        );
+    }
+
+    return $notification;
+}
 }

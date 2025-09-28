@@ -56,14 +56,16 @@ Route::get('/courses/{id}', [CourseController::class, 'show']);
   Route::get('/me/submissions', [RequirementSubmissionController::class, 'getMySubmissions'])->middleware('auth:api','role:Student');
 Route::get('/requirements/{courseId}/course/submissions', [RequirementSubmissionController::class, 'getSubmissionsByCourse'])->middleware('auth:api','role:Admin');
   // Notification Routes
-  Route::post('/courses/{courseId}/notify', [NotificationController::class, 'notifyCourseStudents'])->middleware(['auth:api', 'role:Admin']);
-Route::get('/notifications/me', [NotificationController::class, 'myNotifications'])->middleware(['auth:api', 'role:Student']);
+ Route::post('/courses/{courseId}/notify', [NotificationController::class, 'notifyCourseStudents'])->middleware(['auth:api', 'role:Admin']);
+Route::get('/notifications/me', [NotificationController::class, 'myNotifications'])->middleware('auth:api');
 Route::post('/students/{studentId}/notify', [NotificationController::class, 'notifyStudent'])->middleware(['auth:api', 'role:Admin']); 
 Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['auth:api', 'role:Student']);
 Route::post('/notifications/email/{studentId}', [NotificationController::class, 'sendEmailNotification'])->middleware(['auth:api', 'role:Admin']);
+Route::post('/notify/all', [NotificationController::class, 'notifyAll'])->middleware(['auth:api', 'role:Admin']);
 // Downloadable File Routes
 Route::post('/courses/{courseId}/files', [DownloadableFileController::class, 'uploadFile'])->middleware(['auth:api', 'role:Admin']);
 Route::put('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'updateFile'])->middleware(['auth:api', 'role:Admin']);
 Route::delete('/courses/{courseId}/files/{fileId}', [DownloadableFileController::class, 'deleteFile'])->middleware(['auth:api', 'role:Admin']);
  Route::get('/files/{fileId}/download', [DownloadableFileController::class, 'downloadFile'])->middleware('auth:api');
 Route::get('/courses/{courseId}/files', [DownloadableFileController::class, 'getByCourse'])->middleware('auth:api');
+

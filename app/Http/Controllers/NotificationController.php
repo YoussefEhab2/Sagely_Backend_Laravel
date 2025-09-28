@@ -104,4 +104,27 @@ public function sendEmailNotification(Request $request, $studentId)
     return response()->json(['message' => 'Email notification sent']);
 }
 
+
+public function notifyAll(Request $request)
+    {
+        $request->validate([
+            'type'    => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $senderId = auth('api')->user()->id;
+
+        $recipients = $this->service->notifyAllExceptSender(
+            $senderId,
+            $request->type,
+            $request->message
+        );
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Notifications sent to all users except the sender',
+            'recipients' => $recipients,
+        ]);
+    }
+
 }
