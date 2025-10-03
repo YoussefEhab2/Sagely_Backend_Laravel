@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Course;
 use App\Repositories\EnrollmentRepository;
+use App\Models\Requirementsubmission;
 
 class EnrollmentService
 {
@@ -80,21 +81,16 @@ public function enrollStudentByAdmin(int $courseId, int $studentId, int $adminId
         return ['error' => 'Forbidden: You are not the admin of this course', 'status' => 403];
     }
 
-    // delete old submissions for this student in this course
+    
     $requirements = $course->requirements;
-    foreach ($requirements as $requirement) {
-        foreach ($requirement->submissions as $submission) {
-            if ($submission->studentID === $studentId) {
-                $submission->delete();
-            }
-        }
-    }
+    Requirementsubmission::whereIn('requirementID', $course->requirements->pluck('id'))
+        ->where('studentID', $studentId)
+        ->delete();
 
     if (!$replaceSubmission) {
         return ['message' => 'Submissions deleted only', 'status' => 200];
     }
 
-    // If replaceSubmission = true → enroll after deleting submissions
     if ($this->repository->findEnrollment($courseId, $studentId)) {
         return ['error' => 'Student already enrolled in this course', 'status' => 400];
     }

@@ -126,7 +126,7 @@ public function markAsRead(int $notificationId, int $userId)
         return null;
     }
 
-    $message = "Student {$student->name} submitted a requirement for '{$requirement->title}'.";
+    $message = "Student {$student->name} submitted a requirement for '{$requirement->title} of the course {$requirement->course}'.";
     $type = "Requirement Submission";
 
     
